@@ -7,10 +7,11 @@ import os
 import re
 import contextlib
 import win32com.client
-import PIL
-import sys
-import reportlab
-from reportlab.pdfgen import canvas
+# import mammoth
+# import PIL
+# import sys
+# import reportlab
+# from reportlab.pdfgen import canvas
 
 file = ''
 fold = ''
@@ -95,37 +96,59 @@ def doc2html(in_file):
         wb.SaveAs2(resub(cut_name(in_file))+'.html', FileFormat=8)
         wb.Close()
         word.Quit()
+
+        # with open("d:\\\\123.docx", "rb") as docx_file:
+         #   result = mammoth.convert_to_html(docx_file)
+         #   html = result.value  # The generated HTML
+         #   messages = result.messages  # Any messages,
+
+          #  full_html = (
+          #          '<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body>'
+          #          + html
+          #          + "</body></html>"
+           # )
+
+           # with open("d:\\\\123.html", "w", encoding="utf-8") as f:
+           #     f.write(full_html)
     except:
         return 0
     else:
         return 1
 
-# конвертация xls,xlsx в html
-def xls2html(in_file):
+def repl_html(self):
     try:
-        excel = win32com.client.Dispatch("Word.Application")
+        name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
+        os.rename(r'C:/temp/123.htm', r'C:/temp/' + name + '.htm')
+        os.replace(r'C:/temp/' + name + '.htm', resub(cut_name(self)) + '.htm')
+    except:
+        return 0
+
+# конвертация xls,xlsx в html
+def xls2html(self):
+    try:
+        excel = win32com.client.Dispatch("Excel.Application")
         excel.visible = 0
-        wb = excel.Workbooks.Open('d:\\123.xlsx')
-        wb.ExportAsFixedFormat(0, 'd:\\123.html', False, False)
+        wb = excel.Workbooks.Open(resub(self))
+        wb.ActiveSheet.SaveAs(resub(cut_name(self)), FileFormat=44)
         wb.Close()
         excel.Quit()
+        # repl_html(self)
     except:
         return 0
     else:
         return 1
 
 # Переименование файла из временного 123 в необходимое имя и перемещение в его каталог
-def repl_pdf(in_file):
+def repl_pdf(self):
     try:
-        name = in_file[len(cut_dir(in_file)) + 1:len(cut_name(in_file))]
+        name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
         os.rename(r'C:/temp/123.pdf', r'C:/temp/' + name + '.pdf')
-        os.replace(r'C:/temp/' + name + '.pdf', resub(cut_name(in_file)) + '.pdf')
+        os.replace(r'C:/temp/' + name + '.pdf', resub(cut_name(self)) + '.pdf')
     except:
         return 0
 
 # Сборка в 1 pdf из нескольких
 def pdf_add_page(pdf_files_list):
-
     with contextlib.ExitStack() as stack:
         pdf_merger = PyPDF2.PdfFileMerger()
         files = [stack.enter_context(open(pdf, 'rb')) for pdf in pdf_files_list]
@@ -135,36 +158,43 @@ def pdf_add_page(pdf_files_list):
             pdf_merger.write(f)
 
 # конвертация Xls в pdf
-def excel2pdf(in_file):
+def excel2pdf(self):
     try:
         pages = []
         excel = win32com.client.Dispatch("Excel.Application")
         excel.Visible = 0
-        wb = excel.Workbooks.Open(resub(in_file))
+        excel.DisplayAlerts = False
+        wb = excel.Workbooks.Open(resub(self))
         if len(wb.Worksheets) > 1:
             for i in range(len(wb.Worksheets)):
                 ws = wb.Worksheets[i]
                 # ws.Visible = 1
                 ws.ExportAsFixedFormat(0, 'C:\\temp\\123_' + str(i) + '.pdf', False, False)
                 pages.append('C:\\temp\\123_' + str(i) + '.pdf')
-            pdf_add_page(pages)
-            repl_pdf(in_file)
-            for page in pages:
-                os.remove(page)
+            if len(pages) > 1:
+                pdf_add_page(pages)
+                repl_pdf(self)
+                for page in pages:
+                    os.remove(page)
+
         else:
-            ws = wb.Worksheets[0]
-            wb.SaveAs('C:\\temp\\123', FileFormat=57)
-            repl_pdf(in_file)
+            # ws = wb.Worksheets[0]
+            wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
+            repl_pdf(self)
         wb.Close()
         excel.Quit()
     except:
-        print('Ошибка конвертации ЕXCEL')
+        wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
+        repl_pdf(self)
+        wb.Close()
+        excel.Quit()
+        os.remove('C:\\temp\\123_0.pdf')
     finally:
         return 1
 
-def tif2pdf(in_file):
+def tif2pdf(self):
     # outPDF = canvas.Canvas(cut_name(in_file)+'.pdf', pageCompression=1)
-    # img = PIL.Image.open(in_file)
+    img = PIL.Image.open(self)
     # for page in range(img.n_frames):
     #    img.seek(page)
      #   imgPage = reportlab.lib.utils.ImageReader(img)
@@ -176,9 +206,9 @@ def tif2pdf(in_file):
 
 
 # Удаление исходного файла если стоит чек на удаление
-def state_dell_file(in_file):
+def state_dell_file(self):
     if chk_state_dell.get() == 1:
-        os.remove(in_file)
+        os.remove(self)
 
 # Конвертация файла основная
 def convert_file(in_file):
