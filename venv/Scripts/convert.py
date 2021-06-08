@@ -7,11 +7,12 @@ import os
 import re
 import contextlib
 import win32com.client
+import img2pdf
 # import mammoth
-# import PIL
+import PIL
 # import sys
-# import reportlab
-# from reportlab.pdfgen import canvas
+import reportlab
+from reportlab.pdfgen import canvas
 
 file = ''
 fold = ''
@@ -184,25 +185,40 @@ def excel2pdf(self):
         wb.Close()
         excel.Quit()
     except:
-        wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
+        self.wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
         repl_pdf(self)
-        wb.Close()
-        excel.Quit()
+        self.wb.Close()
+        self.excel.Quit()
         os.remove('C:\\temp\\123_0.pdf')
     finally:
         return 1
 
+# tiff to pdf конвертация
 def tif2pdf(self):
-    # outPDF = canvas.Canvas(cut_name(in_file)+'.pdf', pageCompression=1)
     img = PIL.Image.open(self)
-    # for page in range(img.n_frames):
-    #    img.seek(page)
-     #   imgPage = reportlab.lib.utils.ImageReader(img)
-     #   outPDF.drawImage(imgPage, 0, 0, 595, 841)
-     #   if page < img.n_frames:
-     #       outPDF.showPage()
-    # outPDF.save()
-    # img.close()
+    if img.size[0] < 2600:
+        a4_page_size = [img2pdf.in_to_pt(8.3), img2pdf.in_to_pt(11.7)]
+        layout_function = img2pdf.get_layout_fun(a4_page_size)
+        outPDF = img2pdf.convert(self, layout_fun=layout_function)
+        with open(cut_name(self) + '.pdf', 'wb') as f:
+            f.write(outPDF)
+        # outPDF = canvas.Canvas(cut_name(self) + '.pdf', pageCompression=1)
+        # for page in range(img.n_frames):
+            # img.seek(page)
+            # imgPage = reportlab.lib.utils.ImageReader(img)
+            # outPDF.drawImage(imgPage, 0, 0, 595, 841)
+            # if page < img.n_frames:
+               #  outPDF.showPage()
+        # outPDF.save()
+        # img.close()
+    else:
+        a4_rotate_size = [img2pdf.in_to_pt(11.7), img2pdf.in_to_pt(8.3)]
+        layout_function = img2pdf.get_layout_fun(a4_rotate_size)
+        outPDF = img2pdf.convert(self, layout_fun=layout_function)
+        with open(cut_name(self) + '.pdf', 'wb') as f:
+            f.write(outPDF)
+
+
 
 
 # Удаление исходного файла если стоит чек на удаление
