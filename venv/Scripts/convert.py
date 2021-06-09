@@ -193,41 +193,27 @@ def excel2pdf(self):
     finally:
         return 1
 
-# tiff to pdf конвертация
+# tiff to pdf конвертация(с учетом книжной или альбомной ориентации листа)
 def tif2pdf(self):
     img = PIL.Image.open(self)
     if img.size[0] < 2600:
         a4_page_size = [img2pdf.in_to_pt(8.3), img2pdf.in_to_pt(11.7)]
         layout_function = img2pdf.get_layout_fun(a4_page_size)
-        outPDF = img2pdf.convert(self, layout_fun=layout_function)
-        with open(cut_name(self) + '.pdf', 'wb') as f:
-            f.write(outPDF)
-        # outPDF = canvas.Canvas(cut_name(self) + '.pdf', pageCompression=1)
-        # for page in range(img.n_frames):
-            # img.seek(page)
-            # imgPage = reportlab.lib.utils.ImageReader(img)
-            # outPDF.drawImage(imgPage, 0, 0, 595, 841)
-            # if page < img.n_frames:
-               #  outPDF.showPage()
-        # outPDF.save()
-        # img.close()
+        pdf = img2pdf.convert(self, layout_fun=layout_function)
     else:
         a4_rotate_size = [img2pdf.in_to_pt(11.7), img2pdf.in_to_pt(8.3)]
         layout_function = img2pdf.get_layout_fun(a4_rotate_size)
-        outPDF = img2pdf.convert(self, layout_fun=layout_function)
-        with open(cut_name(self) + '.pdf', 'wb') as f:
-            f.write(outPDF)
-
-
-
+        pdf = img2pdf.convert(self, layout_fun=layout_function)
+    with open(cut_name(self) + '.pdf', 'wb') as f:
+        f.write(pdf)
 
 # Удаление исходного файла если стоит чек на удаление
 def state_dell_file(self):
     if chk_state_dell.get() == 1:
         os.remove(self)
 
-# Конвертация файла основная
-def convert_file(in_file):
+# Конвертация файла в pdf основная
+def convert_file_pdf(in_file):
     if chk_state_pdf.get() == 1:
         if in_file.endswith('.docx'):
             convert(in_file)
@@ -243,11 +229,13 @@ def convert_file(in_file):
         if in_file.endswith('.tif'):
             tif2pdf(in_file)
             state_dell_file(in_file)
-    if chk_state_html.get() == 1:
-        if in_file.endswith('.docx') or in_file.endswith('.doc'):
-            doc2html(in_file)
-        if in_file.endswith('.xls') or in_file.endswith('.xlsx'):
-            xls2html(in_file)
+
+# конвертация файла в html
+def convert_file_html(in_file):
+    if in_file.endswith('.docx') or in_file.endswith('.doc'):
+        doc2html(in_file)
+    if in_file.endswith('.xls') or in_file.endswith('.xlsx'):
+        xls2html(in_file)
         state_dell_file(in_file)
 
 # Отработка нажатия кнопки Конвертирования
@@ -256,7 +244,10 @@ def clicked_con():
         print('Продолжаем выполнение чека на ошибки!!!!')
     else:
         if len(file) > 0:
-            convert_file(file)
+            if chk_state_pdf.get() == 1:
+                convert_file_pdf(file)
+            if chk_state_html.get() == 1:
+                print('тут конвнртация в html')
         if len(fold) > 0:
             print(fold)
 
