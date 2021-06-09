@@ -58,6 +58,10 @@ def clicked_cln():
     fold = ''
 
 # Экранирование "\" в пути файла
+def ekran(file_in):
+    file_out = re.sub(r'\\', r'/', file_in)
+    return file_out
+
 def resub(file_in):
     file_out = re.sub(r'/', r'\\\\', file_in)
     return file_out
@@ -177,7 +181,6 @@ def excel2pdf(self):
                 repl_pdf(self)
                 for page in pages:
                     os.remove(page)
-
         else:
             # ws = wb.Worksheets[0]
             wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
@@ -185,10 +188,10 @@ def excel2pdf(self):
         wb.Close()
         excel.Quit()
     except:
-        self.wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
+        wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
         repl_pdf(self)
-        self.wb.Close()
-        self.excel.Quit()
+        wb.Close()
+        excel.Quit()
         os.remove('C:\\temp\\123_0.pdf')
     finally:
         return 1
@@ -238,18 +241,39 @@ def convert_file_html(in_file):
         xls2html(in_file)
         state_dell_file(in_file)
 
+def conv_file(self):
+    if chk_state_pdf.get() == 1:
+        convert_file_pdf(self)
+    if chk_state_html.get() == 1:
+        print('тут конвнртация в html')
+
+# конвертирование папки в pdf
+def conv_folder(self):
+    # print('self=', self)
+    folder = []
+    for i in os.walk(self):
+        folder.append(i)
+    for address, dirs, files in folder:
+        for file in files:
+            # way = (address+'/'+file)
+            print('ekran(address+'/'+file)= ', ekran(address+'/'+file))
+            conv_file(ekran(address+'/'+file))
+    messagebox.showwarning('Конвертация завершена!')
+
 # Отработка нажатия кнопки Конвертирования
 def clicked_con():
     if chk_err() == 0:
         print('Продолжаем выполнение чека на ошибки!!!!')
     else:
         if len(file) > 0:
-            if chk_state_pdf.get() == 1:
-                convert_file_pdf(file)
-            if chk_state_html.get() == 1:
-                print('тут конвнртация в html')
+            conv_file(file)
         if len(fold) > 0:
-            print(fold)
+            if chk_state_pdf.get() == 1:
+                print('конвертируемся в пдф')
+                conv_folder(fold)
+                # convert_file_pdf(file)
+            if chk_state_html.get() == 1:
+                print('тут конвнртация папки в html через пдф')
 
 
 # Создание интерфейса
