@@ -1,5 +1,5 @@
 from docx2pdf import convert
-# from tkinter.ttk import Checkbutton
+from tkinter.ttk import Progressbar
 from tkinter import filedialog, scrolledtext, messagebox, ttk
 from tkinter import *
 import PyPDF2
@@ -11,8 +11,8 @@ import img2pdf
 # import mammoth
 import PIL
 # import sys
-import reportlab
-from reportlab.pdfgen import canvas
+# import reportlab
+# from reportlab.pdfgen import canvas
 
 file = ''
 fold = ''
@@ -56,14 +56,16 @@ def clicked_cln():
     txt_fold.delete(1.0, END)
     file = ''
     fold = ''
+    bar['value'] = 0
 
-# Экранирование "\" в пути файла
-def ekran(file_in):
-    file_out = re.sub(r'\\', r'/', file_in)
+# Экранирование "/" в пути файла
+def change2(file_in):
+    file_out = re.sub(r'/', r'\\\\', file_in)
     return file_out
 
-def resub(file_in):
-    file_out = re.sub(r'/', r'\\\\', file_in)
+# Экранирование "\" в пути файла
+def change(file_in):
+    file_out = re.sub(r'\\', r'/', file_in)
     return file_out
 
 # Редактируем именя файлов, удаляем старое расширение
@@ -83,7 +85,7 @@ def doc2docx(in_file):
     try:
         word = win32com.client.Dispatch("Word.Application")
         word.visible = 0
-        wb = word.Documents.Open(resub(in_file))
+        wb = word.Documents.Open(change2(in_file))
         wb.SaveAs2(in_file + 'x', FileFormat=16)
         wb.Close()
         word.Quit()
@@ -97,24 +99,10 @@ def doc2html(in_file):
     try:
         word = win32com.client.Dispatch("Word.Application")
         word.visible = 0
-        wb = word.Documents.Open(resub(in_file))
-        wb.SaveAs2(resub(cut_name(in_file))+'.html', FileFormat=8)
+        wb = word.Documents.Open(change2(in_file))
+        wb.SaveAs2(change2(cut_name(in_file))+'.html', FileFormat=8)
         wb.Close()
         word.Quit()
-
-        # with open("d:\\\\123.docx", "rb") as docx_file:
-         #   result = mammoth.convert_to_html(docx_file)
-         #   html = result.value  # The generated HTML
-         #   messages = result.messages  # Any messages,
-
-          #  full_html = (
-          #          '<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body>'
-          #          + html
-          #          + "</body></html>"
-           # )
-
-           # with open("d:\\\\123.html", "w", encoding="utf-8") as f:
-           #     f.write(full_html)
     except:
         return 0
     else:
@@ -124,7 +112,7 @@ def repl_html(self):
     try:
         name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
         os.rename(r'C:/temp/123.htm', r'C:/temp/' + name + '.htm')
-        os.replace(r'C:/temp/' + name + '.htm', resub(cut_name(self)) + '.htm')
+        os.replace(r'C:/temp/' + name + '.htm', change2(cut_name(self)) + '.htm')
     except:
         return 0
 
@@ -133,8 +121,8 @@ def xls2html(self):
     try:
         excel = win32com.client.Dispatch("Excel.Application")
         excel.visible = 0
-        wb = excel.Workbooks.Open(resub(self))
-        wb.ActiveSheet.SaveAs(resub(cut_name(self)), FileFormat=44)
+        wb = excel.Workbooks.Open(change2(self))
+        wb.ActiveSheet.SaveAs(change2(cut_name(self)), FileFormat=44)
         wb.Close()
         excel.Quit()
         # repl_html(self)
@@ -148,7 +136,7 @@ def repl_pdf(self):
     try:
         name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
         os.rename(r'C:/temp/123.pdf', r'C:/temp/' + name + '.pdf')
-        os.replace(r'C:/temp/' + name + '.pdf', resub(cut_name(self)) + '.pdf')
+        os.replace(r'C:/temp/' + name + '.pdf', change2(cut_name(self)) + '.pdf')
     except:
         return 0
 
@@ -163,13 +151,13 @@ def pdf_add_page(pdf_files_list):
             pdf_merger.write(f)
 
 # конвертация Xls в pdf
-def excel2pdf(self):
+def excel2pdf(file_in):
     try:
         pages = []
         excel = win32com.client.Dispatch("Excel.Application")
         excel.Visible = 0
         excel.DisplayAlerts = False
-        wb = excel.Workbooks.Open(resub(self))
+        wb = excel.Workbooks.Open(change2(file_in))
         if len(wb.Worksheets) > 1:
             for i in range(len(wb.Worksheets)):
                 ws = wb.Worksheets[i]
@@ -178,18 +166,18 @@ def excel2pdf(self):
                 pages.append('C:\\temp\\123_' + str(i) + '.pdf')
             if len(pages) > 1:
                 pdf_add_page(pages)
-                repl_pdf(self)
+                repl_pdf(file_in)
                 for page in pages:
                     os.remove(page)
         else:
             # ws = wb.Worksheets[0]
             wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
-            repl_pdf(self)
+            repl_pdf(file_in)
         wb.Close()
         excel.Quit()
     except:
         wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
-        repl_pdf(self)
+        repl_pdf(file_in)
         wb.Close()
         excel.Quit()
         os.remove('C:\\temp\\123_0.pdf')
@@ -245,6 +233,7 @@ def conv_file(self):
     if chk_state_pdf.get() == 1:
         convert_file_pdf(self)
     if chk_state_html.get() == 1:
+        convert_file_html(self)
         print('тут конвнртация в html')
 
 # конвертирование папки в pdf
@@ -256,9 +245,9 @@ def conv_folder(self):
     for address, dirs, files in folder:
         for file in files:
             # way = (address+'/'+file)
-            print('ekran(address+'/'+file)= ', ekran(address+'/'+file))
-            conv_file(ekran(address+'/'+file))
-    messagebox.showwarning('Конвертация завершена!')
+            # print('(addressfile)= ', file)
+            conv_file(change(address + '/' + file))
+    return messagebox.showinfo('Внимание!!', 'Конвертация успешно завершена!')
 
 # Отработка нажатия кнопки Конвертирования
 def clicked_con():
@@ -271,7 +260,6 @@ def clicked_con():
             if chk_state_pdf.get() == 1:
                 print('конвертируемся в пдф')
                 conv_folder(fold)
-                # convert_file_pdf(file)
             if chk_state_html.get() == 1:
                 print('тут конвнртация папки в html через пдф')
 
@@ -279,7 +267,7 @@ def clicked_con():
 # Создание интерфейса
 window = Tk()
 window.title("Pdf & Html converter")
-window.geometry('465x415')
+window.geometry('465x460')
 window.configure(bg='#808080')
 
 # Меню с описанием "О программе"
@@ -307,11 +295,17 @@ fold_btn = Button(window, text="Выберите папку", command=clicked_fo
 fold_btn.grid(row=5, column=0, sticky=E+W)
 txt_fold = scrolledtext.ScrolledText(window, width=55, height=1)
 txt_fold.grid(column=0, row=4, sticky=E)
+lbl_3_1 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
+lbl_3_1.grid(column=0, row=6)
+
+bar = Progressbar(window, length=300, style='black.Horizontal.TProgressbar')
+bar['value'] = 0
+bar.grid(column=0, row=7)
 
 lbl_3 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
-lbl_3.grid(column=0, row=7)
+lbl_3.grid(column=0, row=9)
 cln_btn = Button(window, text="Очистить!", command=clicked_cln)
-cln_btn.grid(row=8, column=0)
+cln_btn.grid(row=10, column=0)
 
 # Чекбоксы для выбора режимов работы
 chk_state_pdf = IntVar()
@@ -319,26 +313,26 @@ chk_state_pdf.set(0)
 chk_state_html = IntVar()
 chk_state_html.set(0)
 chk_pdf = Checkbutton(window, text='PDF', var=chk_state_pdf, bg='#808080')
-chk_pdf.grid(column=0, row=9, sticky=W)
+chk_pdf.grid(column=0, row=11, sticky=W)
 chk_pdf = Checkbutton(window, text='HTML', var=chk_state_html, bg='#808080')
-chk_pdf.grid(column=0, row=10, sticky=W)
+chk_pdf.grid(column=0, row=12, sticky=W)
 
 # Конверировать(кнопка)
 ttk.Style().configure("TButton", padding=10, relief="RAISED", background="#ccc")
 con_btn = ttk.Button(window, text="Конвертировать!", command=clicked_con)
-con_btn.grid(row=11, column=0)
+con_btn.grid(row=13, column=0)
 
 lbl_5 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
-lbl_5.grid(column=0, row=12)
+lbl_5.grid(column=0, row=14)
 
 # Удаление файлов(чекбокс)
 lbl2 = Label(window, text="Внимание! Выбор удалит исходные файлы!",
              font=("Arial Bold", 10), bg='#808080', fg='#dcdcdc')
-lbl2.grid(column=0, row=13)
+lbl2.grid(column=0, row=15)
 chk_state_dell = IntVar()
 chk_state_dell.set(0)
 chk_dell = Checkbutton(window, text='Удаление исходных файлов! ',
                        var=chk_state_dell, bg='#808080')
-chk_dell.grid(column=0, row=14, sticky=W)
+chk_dell.grid(column=0, row=16, sticky=W)
 
 window.mainloop()
