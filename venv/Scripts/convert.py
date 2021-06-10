@@ -236,16 +236,28 @@ def conv_file(self):
         convert_file_html(self)
         print('тут конвнртация в html')
 
+
+def file_count(path):
+    count = 0
+    for f in os.listdir(path):
+        if os.path.isfile(os.path.join(path, f)):
+            count += 1
+    return count
+
 # конвертирование папки в pdf
 def conv_folder(self):
     # print('self=', self)
     folder = []
+    proc = 100/file_count(self)
+    # print('proc= ', proc)
     for i in os.walk(self):
         folder.append(i)
     for address, dirs, files in folder:
         for file in files:
             # way = (address+'/'+file)
             # print('(addressfile)= ', file)
+            bar['value'] += proc
+            window.update()
             conv_file(change(address + '/' + file))
     return messagebox.showinfo('Внимание!!', 'Конвертация успешно завершена!')
 
@@ -298,8 +310,7 @@ txt_fold.grid(column=0, row=4, sticky=E)
 lbl_3_1 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
 lbl_3_1.grid(column=0, row=6)
 
-bar = Progressbar(window, length=300, style='black.Horizontal.TProgressbar')
-bar['value'] = 0
+bar = Progressbar(window, length=300, style='black.Horizontal.TProgressbar', maximum=100, value=0)
 bar.grid(column=0, row=7)
 
 lbl_3 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
