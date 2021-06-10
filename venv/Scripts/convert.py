@@ -17,6 +17,7 @@ import PIL
 file = ''
 fold = ''
 
+# описание О программе
 def about():
     messagebox.showinfo('О программе:', 'Данный конвертер преобразует '
                         'файлы Word, Excel и Tif в PDF или Html.\n\n Автор: ScaLseR')
@@ -49,7 +50,7 @@ def chk_err():
         return 0
     return 1
 
-# Отчитска выбра
+# отработка кнопки Отчитска выбра
 def clicked_cln():
     global file, fold
     txt_file.delete(1.0, END)
