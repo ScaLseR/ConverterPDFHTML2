@@ -1,4 +1,3 @@
-from docx2pdf import convert
 from tkinter.ttk import Progressbar
 from tkinter import filedialog, scrolledtext, messagebox, ttk
 from tkinter import *
@@ -29,7 +28,7 @@ fold = ''
 # описание О программе
 def about():
     messagebox.showinfo('О программе:', 'Данный конвертер преобразует '
-                        'файлы Word, Excel и Tif в PDF или Html.\n\n Автор: ScaLseR')
+                                        'файлы Word, Excel и Tif в PDF или Html.\n\n Автор: ScaLseR')
 
 # Отработка нажатия кнопки открытия файла
 def clicked_file():
@@ -55,7 +54,7 @@ def chk_err():
         return 0
     if chk_state_pdf.get() == 1 and chk_state_html.get() == 1:
         messagebox.showwarning('Внимание!!', 'Выбраны оба режима конвертирования! '
-                               'Выберите только 1 из режимов!')
+                                             'Выберите только 1 из режимов!')
         return 0
     return 1
 
@@ -99,23 +98,27 @@ def pdf_html(in_file):
         div = doc.getPageText(i, "html")
         divs += div
     html = HTML_TEMPLATE.format(title=title, divs=divs)
-    with open(change2(cut_name(in_file))+'.html', 'w') as f:
+    with open(change2(cut_name(in_file)) + '.html', 'w') as f:
         f.write(html)
         f.close()
 
 # Преобразование doc to docx
-def doc2docx(in_file):
-    try:
-        word = win32com.client.Dispatch("Word.Application")
-        word.visible = 0
-        wb = word.Documents.Open(change2(in_file))
-        wb.SaveAs2(in_file + 'x', FileFormat=16)
-        wb.Close()
-        word.Quit()
-    except:
-        return 0
-    else:
-        return 1
+def doc2x(in_file):
+    word = win32com.client.Dispatch("Word.Application")
+    word.visible = 0
+    wb = word.Documents.Open(change2(in_file))
+    wb.SaveAs2(in_file + 'x', FileFormat=16)
+    wb.Close()
+    word.Quit()
+
+# Преобразование doc to pdf
+def doc2pdf(in_file):
+    word = win32com.client.Dispatch("Word.Application")
+    word.visible = 0
+    wb = word.Documents.Open(change2(in_file))
+    wb.SaveAs2(change2(cut_name(in_file)), FileFormat=17)
+    wb.Close()
+    word.Quit()
 
 # Переименование файла из временного 123 в необходимое имя и перемещение в его каталог
 def repl_pdf(self):
@@ -191,13 +194,13 @@ def state_dell_file(self):
 def convert_file_pdf(in_file):
     # if chk_state_pdf.get() == 1:
     if in_file.endswith('.docx'):
-        convert(in_file)
+        doc2pdf(in_file)
         state_dell_file(in_file)
     if in_file.endswith('.doc'):
-        if doc2docx(in_file) == 1:
-            convert(in_file+'x')
-            os.remove(in_file+'x')
-            state_dell_file(in_file)
+        doc2x(in_file)
+        doc2pdf(in_file+'x')
+        os.remove(in_file+'x')
+        state_dell_file(in_file)
     if in_file.endswith('.xlsx') or in_file.endswith('.xls'):
         excel2pdf(in_file)
         state_dell_file(in_file)
@@ -206,23 +209,29 @@ def convert_file_pdf(in_file):
         state_dell_file(in_file)
 
 # конвертация файла в html
-def convert_file_html(in_file):
-    if in_file.endswith('.docx') or in_file.endswith('.doc') or in_file.endswith('.xlsx') \
-            or in_file.endswith('.xls') or in_file.endswith('.tif'):
-        convert_file_pdf(in_file)
-        pdf_html(cut_name(in_file)+'.pdf')
-        os.remove(cut_name(in_file)+'.pdf')
-        state_dell_file(in_file)
+def con_file_html(in_file):
+    # if in_file.endswith('.docx') or in_file.endswith('.doc') or in_file.endswith('.xlsx') \
+    #   or in_file.endswith('.xls') or in_file.endswith('.tif'):
+    # convert_file_pdf(in_file)
+    # pdf_html(cut_name(in_file) + '.pdf')
+    # os.remove(cut_name(in_file) + '.pdf')
+    #  state_dell_file(in_file)
     if in_file.endswith('.pdf'):
         pdf_html(in_file)
         state_dell_file(in_file)
+    else:
+        convert_file_pdf(in_file)
+        pdf_html(cut_name(in_file) + '.pdf')
+        os.remove(cut_name(in_file) + '.pdf')
+        state_dell_file(in_file)
+
 
 # отработка конвертации 1 файла
-def conv_file(in_file):
+def con_file(in_file):
     if chk_state_pdf.get() == 1:
         convert_file_pdf(in_file)
     if chk_state_html.get() == 1:
-        convert_file_html(in_file)
+        con_file_html(in_file)
 
 # счетчик файлов в каталоге, проценты для progressbar
 def file_count(path):
@@ -233,28 +242,28 @@ def file_count(path):
     return count
 
 # конвертирование папки в pdf
-def conv_folder(self):
+def con_folder(self):
     folder = []
-    proc = 100/file_count(self)
+    proc = 100 / file_count(self)
     for i in os.walk(self):
         folder.append(i)
     for address, dirs, files in folder:
-        for file in files:
+        for fil in files:
             bar['value'] += proc
             window.update()
-            conv_file(change(address + '/' + file))
+            con_file(change(address + '/' + fil))
     return messagebox.showinfo('Внимание!!', 'Конвертация успешно завершена!')
 
 # Отработка нажатия кнопки Конвертирования
 def clicked_con():
     if chk_err() == 1:
         if len(file) > 0:
-            conv_file(file)
+            con_file(file)
         if len(fold) > 0:
             if chk_state_pdf.get() == 1:
-                conv_folder(fold)
+                con_folder(fold)
             if chk_state_html.get() == 1:
-                conv_folder(fold)
+                con_folder(fold)
 
 # Создание интерфейса
 window = Tk()
@@ -276,7 +285,7 @@ lbl_1.grid(column=0, row=1)
 
 # Выбор файла для конвертирования(кнопка)
 file_btn = Button(window, text="Выберите файл", command=clicked_file)
-file_btn.grid(row=2, column=0, sticky=E+W)
+file_btn.grid(row=2, column=0, sticky=E + W)
 txt_file = scrolledtext.ScrolledText(window, width=55, height=1)
 txt_file.grid(column=0, row=1, sticky=E)
 lbl_2 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
@@ -284,7 +293,7 @@ lbl_2.grid(column=0, row=3)
 
 # Выбор папки для конвертирования(кнопка)
 fold_btn = Button(window, text="Выберите папку", command=clicked_fold)
-fold_btn.grid(row=5, column=0, sticky=E+W)
+fold_btn.grid(row=5, column=0, sticky=E + W)
 txt_fold = scrolledtext.ScrolledText(window, width=55, height=1)
 txt_fold.grid(column=0, row=4, sticky=E)
 lbl_3_1 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
