@@ -10,9 +10,6 @@ import win32com.client
 import img2pdf
 import fitz
 import PIL
-# import sys
-# import reportlab
-# from reportlab.pdfgen import canvas
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html>
@@ -105,7 +102,6 @@ def pdf_html(in_file):
     with open(change2(cut_name(in_file))+'.html', 'w') as f:
         f.write(html)
         f.close()
-    #print(html)
 
 # Преобразование doc to docx
 def doc2docx(in_file):
@@ -120,43 +116,6 @@ def doc2docx(in_file):
         return 0
     else:
         return 1
-
-# конвертация doc,docx в html
-# def doc2html(in_file):
- #   try:
- #       word = win32com.client.Dispatch("Word.Application")
- #       word.visible = 0
- #       wb = word.Documents.Open(change2(in_file))
- #       wb.SaveAs2(change2(cut_name(in_file))+'.html', FileFormat=8)
- #       wb.Close()
- #       word.Quit()
- #   except:
- #       return 0
- #   else:
- #       return 1
-
-#def repl_html(self):
-#    try:
-#        name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
-#        os.rename(r'C:/temp/123.htm', r'C:/temp/' + name + '.htm')
-#        os.replace(r'C:/temp/' + name + '.htm', change2(cut_name(self)) + '.htm')
-#    except:
-#        return 0
-
-# конвертация xls,xlsx в html
-# def xls2html(self):
-  #  try:
-   #     excel = win32com.client.Dispatch("Excel.Application")
-    #    excel.visible = 0
-     #   wb = excel.Workbooks.Open(change2(self))
-     #   wb.ActiveSheet.SaveAs(change2(cut_name(self)), FileFormat=44)
-     #   wb.Close()
-     #   excel.Quit()
-        # repl_html(self)
-    #except:
-    #    return 0
-    # else:
-     #   return 1
 
 # Переименование файла из временного 123 в необходимое имя и перемещение в его каталог
 def repl_pdf(self):
@@ -188,7 +147,6 @@ def excel2pdf(file_in):
         if len(wb.Worksheets) > 1:
             for i in range(len(wb.Worksheets)):
                 ws = wb.Worksheets[i]
-                # ws.Visible = 1
                 ws.ExportAsFixedFormat(0, 'C:\\temp\\123_' + str(i) + '.pdf', False, False)
                 pages.append('C:\\temp\\123_' + str(i) + '.pdf')
             if len(pages) > 1:
@@ -197,7 +155,6 @@ def excel2pdf(file_in):
                 for page in pages:
                     os.remove(page)
         else:
-            # ws = wb.Worksheets[0]
             wb.ActiveSheet.SaveAs('C:\\temp\\123', FileFormat=57)
             repl_pdf(file_in)
         wb.Close()
@@ -250,7 +207,8 @@ def convert_file_pdf(in_file):
 
 # конвертация файла в html
 def convert_file_html(in_file):
-    if in_file.endswith('.docx') or in_file.endswith('.doc') or in_file.endswith('.xlsx') or in_file.endswith('.xls') or in_file.endswith('.tif'):
+    if in_file.endswith('.docx') or in_file.endswith('.doc') or in_file.endswith('.xlsx') \
+            or in_file.endswith('.xls') or in_file.endswith('.tif'):
         convert_file_pdf(in_file)
         pdf_html(cut_name(in_file)+'.pdf')
         os.remove(cut_name(in_file)+'.pdf')
@@ -259,14 +217,14 @@ def convert_file_html(in_file):
         pdf_html(in_file)
         state_dell_file(in_file)
 
+# отработка конвертации 1 файла
 def conv_file(in_file):
     if chk_state_pdf.get() == 1:
         convert_file_pdf(in_file)
     if chk_state_html.get() == 1:
         convert_file_html(in_file)
 
-
-
+# счетчик файлов в каталоге, проценты для progressbar
 def file_count(path):
     count = 0
     for f in os.listdir(path):
@@ -276,10 +234,8 @@ def file_count(path):
 
 # конвертирование папки в pdf
 def conv_folder(self):
-    # print('self=', self)
     folder = []
     proc = 100/file_count(self)
-    # print('proc= ', proc)
     for i in os.walk(self):
         folder.append(i)
     for address, dirs, files in folder:
@@ -336,10 +292,8 @@ txt_fold = scrolledtext.ScrolledText(window, width=55, height=1)
 txt_fold.grid(column=0, row=4, sticky=E)
 lbl_3_1 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
 lbl_3_1.grid(column=0, row=6)
-
 bar = Progressbar(window, length=300, style='black.Horizontal.TProgressbar', maximum=100, value=0)
 bar.grid(column=0, row=7)
-
 lbl_3 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
 lbl_3.grid(column=0, row=9)
 cln_btn = Button(window, text="Очистить!", command=clicked_cln)
@@ -359,7 +313,6 @@ chk_pdf.grid(column=0, row=12, sticky=W)
 ttk.Style().configure("TButton", padding=10, relief="RAISED", background="#ccc")
 con_btn = ttk.Button(window, text="Конвертировать!", command=clicked_con)
 con_btn.grid(row=13, column=0)
-
 lbl_5 = Label(window, text="", font=("Arial Bold", 10), bg='#808080')
 lbl_5.grid(column=0, row=14)
 
@@ -372,5 +325,4 @@ chk_state_dell.set(0)
 chk_dell = Checkbutton(window, text='Удаление исходных файлов! ',
                        var=chk_state_dell, bg='#808080')
 chk_dell.grid(column=0, row=16, sticky=W)
-
 window.mainloop()
