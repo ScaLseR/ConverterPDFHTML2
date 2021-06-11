@@ -116,18 +116,15 @@ def doc2pdf(in_file):
     word = win32com.client.Dispatch("Word.Application")
     word.visible = 0
     wb = word.Documents.Open(change2(in_file))
-    wb.SaveAs2(change2(cut_name(in_file)), FileFormat=17)
+    wb.SaveAs2(change2(cut_name(in_file))+'.pdf', FileFormat=17)
     wb.Close()
     word.Quit()
 
 # Переименование файла из временного 123 в необходимое имя и перемещение в его каталог
 def repl_pdf(self):
-    try:
-        name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
-        os.rename(r'C:/temp/123.pdf', r'C:/temp/' + name + '.pdf')
-        os.replace(r'C:/temp/' + name + '.pdf', change2(cut_name(self)) + '.pdf')
-    except:
-        return 0
+    name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
+    os.rename(r'C:/temp/123.pdf', r'C:/temp/' + name + '.pdf')
+    os.replace(r'C:/temp/' + name + '.pdf', change2(cut_name(self)) + '.pdf')
 
 # Сборка в 1 pdf из нескольких
 def pdf_add_page(pdf_files_list):
@@ -193,13 +190,8 @@ def state_dell_file(self):
 # Конвертация файла в pdf основная
 def convert_file_pdf(in_file):
     # if chk_state_pdf.get() == 1:
-    if in_file.endswith('.docx'):
+    if in_file.endswith('.docx') or in_file.endswith('.doc'):
         doc2pdf(in_file)
-        state_dell_file(in_file)
-    if in_file.endswith('.doc'):
-        doc2x(in_file)
-        doc2pdf(in_file+'x')
-        os.remove(in_file+'x')
         state_dell_file(in_file)
     if in_file.endswith('.xlsx') or in_file.endswith('.xls'):
         excel2pdf(in_file)
@@ -210,12 +202,6 @@ def convert_file_pdf(in_file):
 
 # конвертация файла в html
 def con_file_html(in_file):
-    # if in_file.endswith('.docx') or in_file.endswith('.doc') or in_file.endswith('.xlsx') \
-    #   or in_file.endswith('.xls') or in_file.endswith('.tif'):
-    # convert_file_pdf(in_file)
-    # pdf_html(cut_name(in_file) + '.pdf')
-    # os.remove(cut_name(in_file) + '.pdf')
-    #  state_dell_file(in_file)
     if in_file.endswith('.pdf'):
         pdf_html(in_file)
         state_dell_file(in_file)
@@ -224,7 +210,6 @@ def con_file_html(in_file):
         pdf_html(cut_name(in_file) + '.pdf')
         os.remove(cut_name(in_file) + '.pdf')
         state_dell_file(in_file)
-
 
 # отработка конвертации 1 файла
 def con_file(in_file):
@@ -260,9 +245,7 @@ def clicked_con():
         if len(file) > 0:
             con_file(file)
         if len(fold) > 0:
-            if chk_state_pdf.get() == 1:
-                con_folder(fold)
-            if chk_state_html.get() == 1:
+            if chk_state_pdf.get() == 1 or chk_state_html.get() == 1:
                 con_folder(fold)
 
 # Создание интерфейса
