@@ -95,21 +95,12 @@ def pdf_html(in_file):
     title = doc.metadata["title"]
     divs = ""
     for i in range(doc.pageCount):
-        div = doc.getPageText(i, "html")
+        div = doc.getPageText(i, "htm")
         divs += div
     html = HTML_TEMPLATE.format(title=title, divs=divs)
-    with open(change2(cut_name(in_file)) + '.html', 'w') as f:
+    with open(change2(cut_name(in_file)) + '.htm', 'w') as f:
         f.write(html)
         f.close()
-
-# Преобразование doc to docx
-def doc2x(in_file):
-    word = win32com.client.Dispatch("Word.Application")
-    word.visible = 0
-    wb = word.Documents.Open(change2(in_file))
-    wb.SaveAs2(in_file + 'x', FileFormat=16)
-    wb.Close()
-    word.Quit()
 
 # Преобразование doc to pdf
 def doc2pdf(in_file):
@@ -250,7 +241,7 @@ def clicked_con():
 
 # Создание интерфейса
 window = Tk()
-window.title("Pdf & Html converter")
+window.title("Pdf & Htm converter")
 window.geometry('465x460')
 window.configure(bg='#808080')
 
