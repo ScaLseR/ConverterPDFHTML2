@@ -8,11 +8,23 @@ import re
 import contextlib
 import win32com.client
 import img2pdf
-# import mammoth
+import fitz
 import PIL
 # import sys
 # import reportlab
 # from reportlab.pdfgen import canvas
+
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html>
+<head>
+<title>{title}</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+{divs}
+</body>
+</html> 
+"""
 
 file = ''
 fold = ''
@@ -81,6 +93,20 @@ def cut_dir(file_in):
     # print('file_out',file_out)
     return file_out
 
+# pdf to html convert
+def pdf_html(in_file):
+    doc = fitz.open(in_file)
+    title = doc.metadata["title"]
+    divs = ""
+    for i in range(doc.pageCount):
+        div = doc.getPageText(i, "html")
+        divs += div
+    html = HTML_TEMPLATE.format(title=title, divs=divs)
+    with open(change2(cut_name(in_file))+'.html', 'w') as f:
+        f.write(html)
+        f.close()
+    #print(html)
+
 # Преобразование doc to docx
 def doc2docx(in_file):
     try:
@@ -96,41 +122,41 @@ def doc2docx(in_file):
         return 1
 
 # конвертация doc,docx в html
-def doc2html(in_file):
-    try:
-        word = win32com.client.Dispatch("Word.Application")
-        word.visible = 0
-        wb = word.Documents.Open(change2(in_file))
-        wb.SaveAs2(change2(cut_name(in_file))+'.html', FileFormat=8)
-        wb.Close()
-        word.Quit()
-    except:
-        return 0
-    else:
-        return 1
+# def doc2html(in_file):
+ #   try:
+ #       word = win32com.client.Dispatch("Word.Application")
+ #       word.visible = 0
+ #       wb = word.Documents.Open(change2(in_file))
+ #       wb.SaveAs2(change2(cut_name(in_file))+'.html', FileFormat=8)
+ #       wb.Close()
+ #       word.Quit()
+ #   except:
+ #       return 0
+ #   else:
+ #       return 1
 
-def repl_html(self):
-    try:
-        name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
-        os.rename(r'C:/temp/123.htm', r'C:/temp/' + name + '.htm')
-        os.replace(r'C:/temp/' + name + '.htm', change2(cut_name(self)) + '.htm')
-    except:
-        return 0
+#def repl_html(self):
+#    try:
+#        name = self[len(cut_dir(self)) + 1:len(cut_name(self))]
+#        os.rename(r'C:/temp/123.htm', r'C:/temp/' + name + '.htm')
+#        os.replace(r'C:/temp/' + name + '.htm', change2(cut_name(self)) + '.htm')
+#    except:
+#        return 0
 
 # конвертация xls,xlsx в html
-def xls2html(self):
-    try:
-        excel = win32com.client.Dispatch("Excel.Application")
-        excel.visible = 0
-        wb = excel.Workbooks.Open(change2(self))
-        wb.ActiveSheet.SaveAs(change2(cut_name(self)), FileFormat=44)
-        wb.Close()
-        excel.Quit()
+# def xls2html(self):
+  #  try:
+   #     excel = win32com.client.Dispatch("Excel.Application")
+    #    excel.visible = 0
+     #   wb = excel.Workbooks.Open(change2(self))
+     #   wb.ActiveSheet.SaveAs(change2(cut_name(self)), FileFormat=44)
+     #   wb.Close()
+     #   excel.Quit()
         # repl_html(self)
-    except:
-        return 0
-    else:
-        return 1
+    #except:
+    #    return 0
+    # else:
+     #   return 1
 
 # Переименование файла из временного 123 в необходимое имя и перемещение в его каталог
 def repl_pdf(self):
@@ -230,12 +256,12 @@ def convert_file_html(in_file):
         xls2html(in_file)
         state_dell_file(in_file)
 
-def conv_file(self):
+def conv_file(in_file):
     if chk_state_pdf.get() == 1:
-        convert_file_pdf(self)
+        convert_file_pdf(in_file)
     if chk_state_html.get() == 1:
-        convert_file_html(self)
-        print('тут конвнртация в html')
+        convert_file_html(in_file)
+
 
 
 def file_count(path):
@@ -255,8 +281,6 @@ def conv_folder(self):
         folder.append(i)
     for address, dirs, files in folder:
         for file in files:
-            # way = (address+'/'+file)
-            # print('(addressfile)= ', file)
             bar['value'] += proc
             window.update()
             conv_file(change(address + '/' + file))
@@ -271,10 +295,9 @@ def clicked_con():
             conv_file(file)
         if len(fold) > 0:
             if chk_state_pdf.get() == 1:
-                print('конвертируемся в пдф')
                 conv_folder(fold)
             if chk_state_html.get() == 1:
-                print('тут конвнртация папки в html через пдф')
+                conv_folder(fold)
 
 
 # Создание интерфейса
