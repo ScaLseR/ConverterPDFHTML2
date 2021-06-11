@@ -232,28 +232,31 @@ def state_dell_file(self):
 
 # Конвертация файла в pdf основная
 def convert_file_pdf(in_file):
-    if chk_state_pdf.get() == 1:
-        if in_file.endswith('.docx'):
-            convert(in_file)
+    # if chk_state_pdf.get() == 1:
+    if in_file.endswith('.docx'):
+        convert(in_file)
+        state_dell_file(in_file)
+    if in_file.endswith('.doc'):
+        if doc2docx(in_file) == 1:
+            convert(in_file+'x')
+            os.remove(in_file+'x')
             state_dell_file(in_file)
-        if in_file.endswith('.doc'):
-            if doc2docx(in_file) == 1:
-                convert(in_file+'x')
-                os.remove(in_file+'x')
-                state_dell_file(in_file)
-        if in_file.endswith('.xlsx') or in_file.endswith('.xls'):
-            excel2pdf(in_file)
-            state_dell_file(in_file)
-        if in_file.endswith('.tif'):
-            tif2pdf(in_file)
-            state_dell_file(in_file)
+    if in_file.endswith('.xlsx') or in_file.endswith('.xls'):
+        excel2pdf(in_file)
+        state_dell_file(in_file)
+    if in_file.endswith('.tif'):
+        tif2pdf(in_file)
+        state_dell_file(in_file)
 
 # конвертация файла в html
 def convert_file_html(in_file):
-    if in_file.endswith('.docx') or in_file.endswith('.doc'):
-        doc2html(in_file)
-    if in_file.endswith('.xls') or in_file.endswith('.xlsx'):
-        xls2html(in_file)
+    if in_file.endswith('.docx') or in_file.endswith('.doc') or in_file.endswith('.xlsx') or in_file.endswith('.xls') or in_file.endswith('.tif'):
+        convert_file_pdf(in_file)
+        pdf_html(cut_name(in_file)+'.pdf')
+        os.remove(cut_name(in_file)+'.pdf')
+        state_dell_file(in_file)
+    if in_file.endswith('.pdf'):
+        pdf_html(in_file)
         state_dell_file(in_file)
 
 def conv_file(in_file):
