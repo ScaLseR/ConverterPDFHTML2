@@ -95,12 +95,13 @@ def pdf_html(in_file):
     title = doc.metadata["title"]
     divs = ""
     for i in range(doc.pageCount):
-        div = doc.getPageText(i, "htm")
+        div = doc.getPageText(i, "html")
         divs += div
     html = HTML_TEMPLATE.format(title=title, divs=divs)
     with open(change2(cut_name(in_file)) + '.htm', 'w') as f:
         f.write(html)
         f.close()
+    # os.rename(change2(cut_name(in_file)) + '.html', change2(cut_name(in_file)) + '.htm')
 
 # Преобразование doc to pdf
 def doc2pdf(in_file):
