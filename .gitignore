@@ -3,4 +3,4 @@ requirements.txt
 __init__.py
 .pytest_cache
 .idea
-venv
+/venv/
