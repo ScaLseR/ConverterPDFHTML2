@@ -3,6 +3,7 @@ from tkinter import filedialog, scrolledtext, messagebox, ttk
 from tkinter import *
 import PyPDF2
 import os
+import stat
 import re
 import contextlib
 import win32com.client
@@ -203,6 +204,7 @@ def tif2pdf(self):
 # Удаление исходного файла если стоит чек на удаление
 def state_dell_file(self):
     if chk_state_dell.get() == 1:
+        os.chmod(self, stat.S_IWUSR)
         os.remove(self)
 
 # Конвертация файла в pdf основная
