@@ -11,7 +11,9 @@ import img2pdf
 import fitz
 import PIL
 import subprocess
+import pathlib
 from pdfrw import PdfReader
+
 
 
 HTML_TEMPLATE = """<!DOCTYPE html>
@@ -158,6 +160,7 @@ def pdf_add_page(pdf_files_list):
 # конвертация Xls в pdf
 def excel2pdf(file_in):
     try:
+        pathlib.Path('c:\\temp').mkdir(parents=True, exist_ok=True)
         pages = []
         excel = win32com.client.Dispatch("Excel.Application")
         excel.Visible = 0
